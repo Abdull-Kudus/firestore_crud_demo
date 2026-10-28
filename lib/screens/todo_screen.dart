@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:provider/provider.dart';
+import '../services/auth_service.dart';
 import '../services/todo_service.dart';
 
 class TodoList extends StatefulWidget {
@@ -149,6 +151,15 @@ class _TodoListState extends State<TodoList> {
       appBar: AppBar(
         title: const Text('Firestore Todo App'),
         actions: [
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: () async {
+              final authService =
+                  Provider.of<AuthService>(context, listen: false);
+              await authService.signOut();
+            },
+            tooltip: 'Logout',
+          ),
           IconButton(
             icon: const Icon(Icons.delete_sweep),
             onPressed: _deleteCompletedTodos,

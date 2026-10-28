@@ -1,9 +1,18 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 class TodoService {
-  static final FirebaseFirestore _firestore = FirebaseFirestore.instance;
-  static final CollectionReference _todosCollection =
-      _firestore.collection('todos');
+  static FirebaseFirestore get _firestore => FirebaseFirestore.instance;
+
+  // Each user gets their own todos under users/{uid}/todos.
+  // A getter (not a final field) so it always uses the current user.
+  static CollectionReference get _todosCollection {
+    final user = FirebaseAuth.instance.currentUser;
+    if (user == null) {
+      throw Exception('No user is signed in');
+    }
+    return _firestore.collection('users/${user.uid}/todos');
+  }
 
   // TODO 1: CREATE - Add new todo to Firestore
   // Instructions:
