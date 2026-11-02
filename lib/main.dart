@@ -5,6 +5,7 @@ import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'package:provider/provider.dart';
 import 'firebase_options.dart';
 import 'services/auth_service.dart';
+import 'services/theme_service.dart';
 import 'screens/login_screen.dart';
 import 'screens/register_screen.dart';
 import 'screens/todo_screen.dart';
@@ -15,26 +16,43 @@ Future<void> main() async {
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
-  runApp(const TodoApp());
+  // Read the saved theme before the first frame so the app opens in it
+  final isDarkMode = await ThemeService.loadIsDarkMode();
+  runApp(TodoApp(isDarkMode: isDarkMode));
 }
 
 class TodoApp extends StatelessWidget {
-  const TodoApp({super.key});
+  final bool isDarkMode;
+
+  const TodoApp({super.key, required this.isDarkMode});
 
   @override
   Widget build(BuildContext context) {
     return MultiProvider(
       providers: [
         Provider<AuthService>(create: (_) => AuthService()),
-      ],
-      child: MaterialApp(
-        debugShowCheckedModeBanner: false,
-        title: 'Todo App with Auth',
-        theme: ThemeData(
-          colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
-          useMaterial3: true,
+        ChangeNotifierProvider<ThemeService>(
+          create: (_) => ThemeService(isDarkMode),
         ),
-        home: const AuthWrapper(),
+      ],
+      child: Consumer<ThemeService>(
+        builder: (context, themeService, _) => MaterialApp(
+          debugShowCheckedModeBanner: false,
+          title: 'Todo App with Auth',
+          theme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(seedColor: Colors.blue),
+            useMaterial3: true,
+          ),
+          darkTheme: ThemeData(
+            colorScheme: ColorScheme.fromSeed(
+              seedColor: Colors.blue,
+              brightness: Brightness.dark,
+            ),
+            useMaterial3: true,
+          ),
+          themeMode: themeService.themeMode,
+          home: const AuthWrapper(),
+        ),
       ),
     );
   }

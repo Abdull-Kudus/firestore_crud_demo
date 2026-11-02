@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:provider/provider.dart';
 import '../services/auth_service.dart';
+import '../services/theme_service.dart';
 import '../services/todo_service.dart';
 
 class TodoList extends StatefulWidget {
@@ -147,10 +148,18 @@ class _TodoListState extends State<TodoList> {
 
   @override
   Widget build(BuildContext context) {
+    final themeService = context.watch<ThemeService>();
+
     return Scaffold(
       appBar: AppBar(
         title: const Text('Firestore Todo App'),
         actions: [
+          // Dark / light mode switch, saved with shared_preferences
+          Icon(themeService.isDarkMode ? Icons.dark_mode : Icons.light_mode),
+          Switch(
+            value: themeService.isDarkMode,
+            onChanged: themeService.toggleTheme,
+          ),
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () async {
